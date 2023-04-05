@@ -71,12 +71,25 @@ List<String> extractKotlinDataClasses(String input) {
 
   final matches = "data class".allMatches(input);
   for (final match in matches) {
-    final end = ")".allMatches(input, match.start);
     bool characterFound = false;
     String character = "";
     int max = input.length;
-    int index = end.first.end;
-    int endIndex = end.first.end;
+    int index = match.end;
+    int openBrackets = 0;
+    int endBrackets = 0;
+    while (openBrackets != endBrackets || endBrackets == 0) {
+      if (index == max) {
+        break;
+      }
+      final char = input[index];
+      if (char == "(") {
+        openBrackets++;
+      } else if (char == ")") {
+        endBrackets++;
+      }
+      index++;
+    }
+    int endIndex = index;
     while (!characterFound && index < max) {
       character = input[index];
       if (character != " ") {
@@ -97,7 +110,7 @@ List<String> extractKotlinDataClasses(String input) {
       }
       endIndex = index - 1;
     }
-    dataClasses.add(input.substring(match.start, endIndex));
+    dataClasses.add(input.substring(match.start, endIndex).trim());
   }
   return dataClasses;
 }
@@ -121,6 +134,7 @@ Class parseKotlinDataClass(
   if (matches.length != 1) {
     throw Exception("None or more than 1 data class found");
   }
+  // TODO: fix this part - it does nut support functions in constructors
   kotlinDataClass = kotlinDataClass.replaceAll("data class ", "");
   var fragments = kotlinDataClass.split("(");
   fragments = [fragments.first, ...fragments.last.split(")")];

@@ -24,6 +24,15 @@ void main() {
         expect(fieldOutput.trim(), "String name;");
       });
 
+      test('Parse field with default method optional', () {
+        final field = 'val customClass: List<CustomClass> = emptyList()';
+
+        final convertedField = parseKotlinField(field, true);
+        final fieldOutput = convertedField.accept(DartEmitter()).toString();
+
+        expect(fieldOutput.trim(), "List<CustomClass> customClass;");
+      });
+
       test('Parse field with override, includeInterface false', () {
         final field = 'override val name: String = "hello"';
 
@@ -121,8 +130,7 @@ void main() {
         final convertedField = parseKotlinField(field, true);
         final fieldOutput = convertedField.accept(DartEmitter()).toString();
 
-        expect(
-            fieldOutput.trim(), "List<bool> arrayField;");
+        expect(fieldOutput.trim(), "List<bool> arrayField;");
       });
     });
 
@@ -200,6 +208,24 @@ void main() {
             String name;
 
             int? age;
+          }''';
+
+        expect(convertedClass, dartfmt.format(expectedClass));
+      });
+
+      test('Simple class conversion with defaults with method', () {
+        final input = '''
+          data class User(val name: String = "", val customClass: List<CustomClass> = emptyList())
+          ''';
+
+        final convertedClass = convertKotlinDataClass(input);
+        final expectedClass = '''
+          class User{
+            User({required this.name, required this.customClass,});
+
+            String name;
+
+            List<CustomClass> customClass;
           }''';
 
         expect(convertedClass, dartfmt.format(expectedClass));
@@ -292,14 +318,14 @@ void main() {
     group('extractKotlinDataClasses -', () {
       test('Extract 3 data classes', () {
         final input = '''
-          data class User(override val name: String, override val age: Int? = 0) : Person
+          data class User(override val name: String, override val age: Int? = 0, override val test: List<Int> = emptyList()) : Person
           class User(override val name: String, override val age: Int? = 0) : Person
           data class Member(override val name: String, override val age: Int? = 0)
           class Member(override val name: String, override val age: Int? = 0)
           data class User(override val name: String, override val age: Int? = 0) : Person()
           ''';
         expect(extractKotlinDataClasses(input), [
-          "data class User(override val name: String, override val age: Int? = 0) : Person",
+          "data class User(override val name: String, override val age: Int? = 0, override val test: List<Int> = emptyList()) : Person",
           "data class Member(override val name: String, override val age: Int? = 0)",
           "data class User(override val name: String, override val age: Int? = 0) : Person"
         ]);
