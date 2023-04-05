@@ -5,14 +5,31 @@ import 'kotlin_types_map.dart';
 
 final _dartfmt = DartFormatter();
 
+/// Generates code for a Dart class out of a string containing Kotlin data classes
+///
+/// `annotationType` will create classes which can be used
+/// with the `freezed` or `json_serializable` packages
+///
+/// Set `includeDefaults` to false if fields with defaults are not serialized
+///
+/// Setting `includeInterface` to `true` will enrich the resulting class with the interface as a mixin
+/// & annotate overriden fields with `@override`
 String convertOneOrMultipleKotlinDataClasses(
   String kotlinDataClasses, {
   AnnotationType annotationType = AnnotationType.none,
   bool includeDefaults = true,
   bool includeInterface = false,
+  bool includeFileHeaders = true,
 }) {
   final classes = extractKotlinDataClasses(kotlinDataClasses);
   String output = "";
+  if (includeFileHeaders) {
+    if (annotationType == AnnotationType.jsonSerializable) {
+      output += "import 'package:json_annotation/json_annotation.dart';";
+      output += "part 'XXX.g.dart';";
+    }
+  }
+
   for (final dataClass in classes) {
     output += convertKotlinDataClass(
       dataClass,
@@ -21,6 +38,7 @@ String convertOneOrMultipleKotlinDataClasses(
       includeInterface: includeInterface,
     );
   }
+
   return _dartfmt.format(output);
 }
 
