@@ -136,14 +136,16 @@ Class parseKotlinDataClass(
   }
   // TODO: fix this part - it does nut support functions in constructors
   kotlinDataClass = kotlinDataClass.replaceAll("data class ", "");
-  var fragments = kotlinDataClass.split("(");
-  fragments = [fragments.first, ...fragments.last.split(")")];
-  final name = fragments[0];
-  var fields = fragments[1].split(",");
+  final startEnd = _getArgumentsStartAndEnd(kotlinDataClass);
+  final name = kotlinDataClass.substring(0, startEnd[0]);
+  var fields =
+      kotlinDataClass.substring(startEnd[0] + 1, startEnd[1] - 1).split(",");
+
   String? interface;
   if (includeInterface) {
-    if (fragments.last.contains(":")) {
-      interface = fragments.last.split(":").last.trim();
+    final lastPart = kotlinDataClass.substring(startEnd[1]);
+    if (lastPart.contains(":")) {
+      interface = lastPart.split(":").last.trim();
     }
   }
   if (!includeDefaults) {
@@ -194,6 +196,40 @@ Class parseKotlinDataClass(
     ..mixins.addAll([
       if (interface != null) refer(interface),
     ]));
+}
+
+void main(List<String> args) {
+  final input =
+      '''data class User(val name: String = "", val customClass: List<CustomClass> = emptyList()) : Tst''';
+  final startEnd = _getArgumentsStartAndEnd(input);
+  print(input.substring(0, startEnd[0]));
+  print(input.substring(startEnd[0] + 1, startEnd[1] - 1));
+  print(input.substring(startEnd[1]));
+}
+
+List<int> _getArgumentsStartAndEnd(String input) {
+  int openBrackets = 0;
+  int closedBrackets = 0;
+
+  int index = 0;
+
+  int startIndex = 0;
+
+  while ((openBrackets != closedBrackets || closedBrackets == 0) &&
+      index < input.length) {
+    final char = input[index];
+    if (char == "(") {
+      if (openBrackets == 0) {
+        startIndex = index;
+      }
+      openBrackets++;
+    } else if (char == ")") {
+      closedBrackets++;
+    }
+    index++;
+  }
+
+  return [startIndex, index];
 }
 
 Constructor getJsonSerializableConstructor(String className) {
