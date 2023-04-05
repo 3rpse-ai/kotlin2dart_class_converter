@@ -5,6 +5,25 @@ import 'kotlin_types_map.dart';
 
 final _dartfmt = DartFormatter();
 
+String convertOneOrMultipleKotlinDataClasses(
+  String kotlinDataClasses, {
+  AnnotationType annotationType = AnnotationType.none,
+  bool includeDefaults = true,
+  bool includeInterface = false,
+}) {
+  final classes = extractKotlinDataClasses(kotlinDataClasses);
+  String output = "";
+  for (final dataClass in classes) {
+    output += convertKotlinDataClass(
+      dataClass,
+      annotationType: annotationType,
+      includeDefaults: includeDefaults,
+      includeInterface: includeInterface,
+    );
+  }
+  return _dartfmt.format(output);
+}
+
 /// Generates code for a Dart class out of a Kotlin data class
 ///
 /// `annotationType` will create classes which can be used
