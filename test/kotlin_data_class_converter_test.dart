@@ -196,6 +196,34 @@ void main() {
         expect(convertedClass, dartfmt.format(expectedClass));
       });
 
+      test('Simple class conversion with Map using generics', () {
+        final input = '''
+          data class Person(val features: Map<String, Any?>)''';
+        final convertedClass = convertKotlinDataClass(input);
+        final expectedClass = '''
+          class Person{
+            Person({required this.features});
+
+            Map<String, Object?> features;
+          }''';
+
+        expect(convertedClass, dartfmt.format(expectedClass));
+      });
+
+      test('Simple class conversion with Map using nested generics', () {
+        final input = '''
+          data class Person(val features: Map<String, Map<String, Any?>>)''';
+        final convertedClass = convertKotlinDataClass(input);
+        final expectedClass = '''
+          class Person{
+            Person({required this.features});
+
+            Map<String, Map<String, Object?>> features;
+          }''';
+
+        expect(convertedClass, dartfmt.format(expectedClass));
+      });
+
       test('Simple class conversion with defaults', () {
         final input = '''
           data class User(val name: String = "", val age: Int? = 0)
