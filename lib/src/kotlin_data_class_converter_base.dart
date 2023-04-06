@@ -134,7 +134,6 @@ Class parseKotlinDataClass(
   if (matches.length != 1) {
     throw Exception("None or more than 1 data class found");
   }
-  // TODO: fix this part - it does nut support functions in constructors
   kotlinDataClass = kotlinDataClass.replaceAll("data class ", "");
   final startEnd = _getArgumentsStartAndEnd(kotlinDataClass);
   final name = kotlinDataClass.substring(0, startEnd[0]);
