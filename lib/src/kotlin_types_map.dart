@@ -1,5 +1,7 @@
 const Map<String, String> kotlinTypesMap = {
   "Any": "Object",
+  "Unit": "void",
+  "Nothing": "Never",
   "Byte": "int",
   "Short": "int",
   "Int": "int",
