@@ -115,6 +115,26 @@ List<String> extractKotlinDataClasses(String input) {
   return dataClasses;
 }
 
+List<String> _extractFields(String fieldsString) {
+  List<String> fields = [];
+  int genericStarts = 0;
+  int genericEnds = 0;
+  int startIndex = 0;
+  for (int i = 0; i < fieldsString.length; i++) {
+    final char = fieldsString[i];
+    if (char == "<") {
+      genericStarts++;
+    } else if (char == ">") {
+      genericEnds++;
+    } else if (genericStarts == genericEnds && char == ",") {
+      fields.add(fieldsString.substring(startIndex, i));
+      startIndex = i + 1;
+    }
+  }
+  fields.add(fieldsString.substring(startIndex));
+  return fields;
+}
+
 /// Parses a Kotlin data class String to the `Class` type of the `code_builder` package
 ///
 /// `annotationType` will create classes which can be used
@@ -137,8 +157,9 @@ Class parseKotlinDataClass(
   kotlinDataClass = kotlinDataClass.replaceAll("data class ", "");
   final startEnd = _getArgumentsStartAndEnd(kotlinDataClass);
   final name = kotlinDataClass.substring(0, startEnd[0]);
-  var fields =
-      kotlinDataClass.substring(startEnd[0] + 1, startEnd[1] - 1).split(",");
+  var fieldsString =
+      kotlinDataClass.substring(startEnd[0] + 1, startEnd[1] - 1);
+  List<String> fields = _extractFields(fieldsString);
 
   String? interface;
   if (includeInterface) {
@@ -195,15 +216,6 @@ Class parseKotlinDataClass(
     ..mixins.addAll([
       if (interface != null) refer(interface),
     ]));
-}
-
-void main(List<String> args) {
-  final input =
-      '''data class User(val name: String = "", val customClass: List<CustomClass> = emptyList()) : Tst''';
-  final startEnd = _getArgumentsStartAndEnd(input);
-  print(input.substring(0, startEnd[0]));
-  print(input.substring(startEnd[0] + 1, startEnd[1] - 1));
-  print(input.substring(startEnd[1]));
 }
 
 List<int> _getArgumentsStartAndEnd(String input) {
