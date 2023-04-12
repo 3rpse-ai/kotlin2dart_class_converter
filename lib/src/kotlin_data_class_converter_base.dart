@@ -132,7 +132,7 @@ List<String> _extractFields(String fieldsString) {
     }
   }
   fields.add(fieldsString.substring(startIndex));
-  return fields.where((field) => field.isNotEmpty).toList();
+  return fields.where((field) => field.trim().isNotEmpty).toList();
 }
 
 /// Parses a Kotlin data class String to the `Class` type of the `code_builder` package

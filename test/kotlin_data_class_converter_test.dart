@@ -176,6 +176,27 @@ void main() {
         expect(convertedClass, dartfmt.format(expectedClass));
       });
 
+      test('Simple class conversion with comma at end & new line', () {
+        final convertedClass = convertKotlinDataClass('''data class User(
+            val name: String,
+            val age: Int,
+        )''');
+        final expectedClass = '''
+        class User {
+          User({
+            required this.name,
+            required this.age,
+          });
+
+          String name;
+
+          int age;
+        }
+        ''';
+
+        expect(convertedClass, dartfmt.format(expectedClass));
+      });
+
       test('Simple class conversion with JsonSerializable', () {
         final convertedClass = convertKotlinDataClass(
             "data class User(val name: String, val age: Int)",
